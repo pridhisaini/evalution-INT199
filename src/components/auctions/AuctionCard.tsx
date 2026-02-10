@@ -7,12 +7,14 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Countdown } from "@/components/shared/Countdown"; // Need to update import path if moved
 import { Button } from "@/components/ui/button";
+import { formatIST } from "@/lib/utils";
 
 interface AuctionCardProps {
     auction: Auction;
 }
 
 export function AuctionCard({ auction }: AuctionCardProps) {
+    console.log(auction, "auction datat");
     return (
         <Card className="group overflow-hidden transition-all hover:shadow-lg">
             <div className="relative aspect-[4/3] overflow-hidden bg-muted">
@@ -50,7 +52,10 @@ export function AuctionCard({ auction }: AuctionCardProps) {
                 </div>
                 <div className="text-right">
                     <p className="text-xs text-muted-foreground">Ends in</p>
-                    <Countdown endTime={auction.endTime} className="text-sm font-medium text-destructive" />
+                    <Countdown endsAtIST={auction.endsAtIST} className="text-sm font-medium text-destructive" />
+                    <p className="text-[9px] text-muted-foreground/60 mt-0.5 leading-none">
+                        {formatIST(new Date(auction.endsAtIST))}
+                    </p>
                 </div>
             </CardFooter>
         </Card>

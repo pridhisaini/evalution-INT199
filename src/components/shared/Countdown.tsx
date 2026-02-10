@@ -4,27 +4,27 @@ import { useEffect, useState } from "react";
 import { intervalToDuration, isPast, type Duration } from "date-fns";
 
 interface CountdownProps {
-    endTime: Date;
+    endsAtIST: Date;
     onEnd?: () => void;
     className?: string;
 }
 
-export function Countdown({ endTime, onEnd, className }: CountdownProps) {
+export function Countdown({ endsAtIST, onEnd, className }: CountdownProps) {
     const [timeLeft, setTimeLeft] = useState<Duration | null>(null);
 
     useEffect(() => {
         const timer = setInterval(() => {
-            if (isPast(endTime)) {
+            if (isPast(endsAtIST)) {
                 clearInterval(timer);
                 setTimeLeft(null);
                 onEnd?.();
                 return;
             }
-            setTimeLeft(intervalToDuration({ start: new Date(), end: endTime }));
+            setTimeLeft(intervalToDuration({ start: new Date(), end: endsAtIST }));
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [endTime, onEnd]);
+    }, [endsAtIST, onEnd]);
 
     if (!timeLeft) return <span className={className}>Closed</span>;
 

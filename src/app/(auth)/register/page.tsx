@@ -95,6 +95,11 @@ export default function RegisterPage() {
                                 <label htmlFor="password" className="text-sm font-medium">Password</label>
                                 <Input id="password" name="password" type="password" required />
                             </div>
+                            {error && (
+                                <div className="text-sm text-red-500 bg-red-50 dark:bg-red-950/20 p-3 rounded-md border border-red-200 dark:border-red-900 animate-in fade-in slide-in-from-top-1">
+                                    {error}
+                                </div>
+                            )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
                             <Button className="w-full" size="lg" disabled={isLoading}>

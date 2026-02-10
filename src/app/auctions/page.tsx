@@ -1,27 +1,49 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AuctionCard } from "@/components/auctions/AuctionCard";
-import { MOCK_AUCTIONS, CATEGORIES } from "@/lib/mock-data";
+import { Auction, CATEGORIES } from "@/lib/mock-data";
+import { getAuctions } from "@/services/auctionService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { X, Search } from "lucide-react";
+import { X, Search, Loader2 } from "lucide-react";
+import useSWR from "swr";
 
-export default function AuctionsPage() {
+function AuctionsPageContent() {
     const searchParams = useSearchParams();
     const initialSearch = searchParams.get("search") || "";
     const initialCategory = searchParams.get("category") || null;
 
+    const [currentPage, setCurrentPage] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [sortBy, setSortBy] = useState("ending");
     const [statusFilters, setStatusFilters] = useState({
         live: true,
-        upcoming: false,
-        endingSoon: false,
+        upcoming: true,
+        endingSoon: true,
     });
+
+    const { data, isLoading } = useSWR(
+        [`/auctions`, currentPage, 10],
+        ([url, page, limit]) => getAuctions(page, limit),
+        {
+            revalidateOnFocus: true,
+            keepPreviousData: true,
+            dedupingInterval: 5000,
+        }
+    );
+
+    const auctions = data?.auctions || [];
+    const pagination = data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 };
+
+    useEffect(() => {
+        if (!isLoading) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [currentPage, isLoading]);
 
     // Initialize category from URL param
     useEffect(() => {
@@ -34,26 +56,30 @@ export default function AuctionsPage() {
     }, [initialCategory]);
 
     // Helper function to determine auction status
-    const getAuctionStatus = (endTime: Date) => {
-        const now = new Date();
-        const end = new Date(endTime);
-        const hoursLeft = (end.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const getAuctionStatus = (endsAtIST: Date, apiStatus?: string) => {
+        const status = apiStatus?.toUpperCase();
+        if (status === "SOLD" || status === "EXPIRED") return "ended";
 
-        if (hoursLeft < 0) return "ended";
+        const now = new Date();
+        const end = new Date(endsAtIST);
+        const diffMs = end.getTime() - now.getTime();
+        const hoursLeft = diffMs / (1000 * 60 * 60);
+
+        if (hoursLeft <= 0) return "ended";
         if (hoursLeft < 2) return "endingSoon";
         if (hoursLeft > 24 * 7) return "upcoming";
         return "live";
     };
 
     // Filter auctions based on category, search, and status
-    const filteredAuctions = [...MOCK_AUCTIONS, ...MOCK_AUCTIONS].filter((auction) => {
+    const filteredAuctions = auctions.filter((auction) => {
         const matchesCategory = !selectedCategory || auction.category.toLowerCase() === selectedCategory.toLowerCase();
         const matchesSearch = !searchQuery ||
             auction.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             auction.description.toLowerCase().includes(searchQuery.toLowerCase());
 
         // Status filtering
-        const status = getAuctionStatus(auction.endTime);
+        const status = getAuctionStatus(auction.endsAtIST, auction.status);
         const matchesStatus =
             (statusFilters.live && status === "live") ||
             (statusFilters.upcoming && status === "upcoming") ||
@@ -67,13 +93,13 @@ export default function AuctionsPage() {
     const sortedAuctions = [...filteredAuctions].sort((a, b) => {
         switch (sortBy) {
             case "ending":
-                return new Date(a.endTime).getTime() - new Date(b.endTime).getTime();
+                return new Date(a.endsAtIST).getTime() - new Date(b.endsAtIST).getTime();
             case "price-low":
                 return a.currentBid - b.currentBid;
             case "price-high":
                 return b.currentBid - a.currentBid;
             case "newest":
-                return new Date(b.endTime).getTime() - new Date(a.endTime).getTime();
+                return new Date(b.endsAtIST).getTime() - new Date(a.endsAtIST).getTime();
             default:
                 return 0;
         }
@@ -140,21 +166,6 @@ export default function AuctionsPage() {
                             </div>
                         </div>
 
-                        <div>
-                            <h3 className="mb-4 text-lg font-semibold">Categories</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {CATEGORIES.map((category) => (
-                                    <Badge
-                                        key={category.id}
-                                        variant={selectedCategory === category.name ? "default" : "outline"}
-                                        className="cursor-pointer hover:bg-secondary transition-colors px-3 py-1"
-                                        onClick={() => handleCategoryClick(category.id)}
-                                    >
-                                        {category.name}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </div>
 
                         <div>
                             <h3 className="mb-4 text-lg font-semibold">Status</h3>
@@ -213,7 +224,12 @@ export default function AuctionsPage() {
                         </div>
                     )}
 
-                    {sortedAuctions.length > 0 ? (
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                            <p className="text-muted-foreground">Refreshing auction list...</p>
+                        </div>
+                    ) : sortedAuctions.length > 0 ? (
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {sortedAuctions.map((auction, i) => (
                                 <AuctionCard key={`${auction.id}-${i}`} auction={auction} />
@@ -228,13 +244,56 @@ export default function AuctionsPage() {
                         </div>
                     )}
 
-                    {sortedAuctions.length > 0 && (
-                        <div className="mt-8 flex justify-center">
-                            <Button variant="outline" size="lg">Load More</Button>
+                    {!isLoading && pagination.totalPages > 1 && (
+                        <div className="mt-12 flex items-center justify-center gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                className="px-4"
+                            >
+                                Previous
+                            </Button>
+
+                            <div className="flex items-center gap-1 mx-2">
+                                {[...Array(pagination.totalPages)].map((_, i) => (
+                                    <Button
+                                        key={i + 1}
+                                        variant={currentPage === i + 1 ? "default" : "outline"}
+                                        size="icon"
+                                        className="h-10 w-10 font-bold"
+                                        onClick={() => setCurrentPage(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </Button>
+                                ))}
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                                disabled={currentPage === pagination.totalPages}
+                                className="px-4"
+                            >
+                                Next
+                            </Button>
                         </div>
                     )}
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function AuctionsPage() {
+    return (
+        <Suspense fallback={
+            <div className="container py-20 flex flex-col items-center justify-center space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-muted-foreground">Loading auctions...</p>
+            </div>
+        }>
+            <AuctionsPageContent />
+        </Suspense>
     );
 }

@@ -6,14 +6,21 @@ export interface Auction {
     description: string;
     currentBid: number;
     startingPrice: number;
-    endTime: Date;
+    endsAtIST: Date;
     image: string;
     bids: number;
     category: string;
     status?: string;
+    bids_history?: {
+        id: number;
+        bidderName: string;
+        amount: number;
+        timestamp: string;
+    }[];
 }
 
 export const CATEGORIES = [
+    { id: "general", name: "General", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400" },
     { id: "art", name: "Art", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400" },
     { id: "jewelry", name: "Jewelry", image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=400" },
     { id: "watches", name: "Watches", image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=400" },
@@ -29,7 +36,7 @@ export const MOCK_AUCTIONS: Auction[] = [
         description: "A pristine condition vintage Rolex Submariner from 1980. Original box and papers included.",
         currentBid: 12500,
         startingPrice: 8000,
-        endTime: addHours(new Date(), 4),
+        endsAtIST: addHours(new Date(), 4),
         image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=800",
         bids: 14,
         category: "Watches",
@@ -40,7 +47,7 @@ export const MOCK_AUCTIONS: Auction[] = [
         description: "Original Eames Lounge Chair and Ottoman. Black leather and rosewood.",
         currentBid: 4200,
         startingPrice: 3500,
-        endTime: addDays(new Date(), 2),
+        endsAtIST: addDays(new Date(), 2),
         image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&q=80&w=800",
         bids: 8,
         category: "Furniture",
@@ -51,7 +58,7 @@ export const MOCK_AUCTIONS: Auction[] = [
         description: "Fully restored 1965 Ford Mustang. 289 V8 engine, 4-speed manual transmission.",
         currentBid: 45000,
         startingPrice: 30000,
-        endTime: addDays(new Date(), 5),
+        endsAtIST: addDays(new Date(), 5),
         image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800",
         bids: 22,
         category: "Classic Cars",
@@ -62,7 +69,7 @@ export const MOCK_AUCTIONS: Auction[] = [
         description: "Example abstract art piece by a contemporary artist.",
         currentBid: 850,
         startingPrice: 500,
-        endTime: addHours(new Date(), 1),
+        endsAtIST: addHours(new Date(), 1),
         image: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800",
         bids: 6,
         category: "Art",
@@ -73,7 +80,7 @@ export const MOCK_AUCTIONS: Auction[] = [
         description: "14k White Gold Diamond Tennis Bracelet, 5.00ctw.",
         currentBid: 3200,
         startingPrice: 2800,
-        endTime: addDays(new Date(), 3),
+        endsAtIST: addDays(new Date(), 3),
         image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800",
         bids: 9,
         category: "Jewelry",

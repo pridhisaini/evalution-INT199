@@ -10,11 +10,18 @@ export interface ApiAuction {
     creatorId: number;
     winnerId: number | null;
     endsAt: string;
+    endsAtIST: string;
     createdAt: string;
     creator: {
         id: number;
         email: string;
     };
+    bids_history?: {
+        id: number;
+        bidderName: string;
+        amount: number;
+        timestamp: string;
+    }[];
 }
 
 export interface AuctionsResponse {
@@ -32,9 +39,9 @@ const API_URL = "https://krystal-solutional-cherish.ngrok-free.dev";
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400";
 const DEFAULT_CATEGORY = "General";
 
-export async function getAuctions(): Promise<Auction[]> {
+export async function getAuctions(page: number = 1, limit: number = 10): Promise<{ auctions: Auction[], pagination: AuctionsResponse['pagination'] }> {
     try {
-        const response = await fetch(`${API_URL}/auctions`, {
+        const response = await fetch(`${API_URL}/auctions?page=${page}&limit=${limit}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -50,24 +57,31 @@ export async function getAuctions(): Promise<Auction[]> {
         }
 
         const data: AuctionsResponse = await response.json();
+        console.log("fetch response", data);
 
-        return data.auctions.map((apiAuction) => ({
+        const mappedAuctions = data.auctions.map((apiAuction) => ({
             id: apiAuction.id.toString(),
             title: apiAuction.title,
             description: apiAuction.description,
             currentBid: parseFloat(apiAuction.currentPrice),
             startingPrice: parseFloat(apiAuction.startingPrice),
-            endTime: new Date(apiAuction.endsAt),
-            image: PLACEHOLDER_IMAGE, // API doesn't have image field yet
-            bids: 0, // API doesn't return bid count yet
-            category: DEFAULT_CATEGORY, // API doesn't return category yet
+            endsAtIST: new Date(apiAuction.endsAtIST),
+            image: `https://picsum.photos/seed/${apiAuction.id}/600/400`,
+            bids: apiAuction.bids_history?.length || 0,
+            category: DEFAULT_CATEGORY,
             status: apiAuction.status,
         }));
+
+        return {
+            auctions: mappedAuctions,
+            pagination: data.pagination
+        };
     } catch (error) {
         console.error("Error fetching auctions:", error);
-        // Fallback to empty array or rethrow depending on desired behavior
-        // returning empty array to avoid crashing the dashboard if API is down
-        return [];
+        return {
+            auctions: [],
+            pagination: { total: 0, page: 1, limit: 10, totalPages: 0 }
+        };
     }
 }
 
@@ -88,18 +102,19 @@ export async function getAuctionById(id: string): Promise<Auction | null> {
         }
 
         const apiAuction: ApiAuction = await response.json();
-
+console.log("fetch auction by id response", apiAuction);
         return {
             id: apiAuction.id.toString(),
             title: apiAuction.title,
             description: apiAuction.description,
             currentBid: parseFloat(apiAuction.currentPrice),
             startingPrice: parseFloat(apiAuction.startingPrice),
-            endTime: new Date(apiAuction.endsAt),
-            image: PLACEHOLDER_IMAGE,
+            endsAtIST: new Date(apiAuction.endsAtIST),
+            image: `https://picsum.photos/seed/${apiAuction.id}/600/400`,
             bids: 0,
             category: DEFAULT_CATEGORY,
             status: apiAuction.status,
+            bids_history: apiAuction.bids_history,
         };
     } catch (error) {
         console.error("Error fetching auction by ID:", error);
@@ -131,5 +146,37 @@ export async function placeBid(auctionId: string, amount: number, token: string)
     } catch (error) {
         console.error("Error placing bid:", error);
         return { success: false, message: "An error occurred while placing your bid." };
+    }
+}
+
+export async function deductBalance(amount: number, token: string): Promise<{ success: boolean; newBalance?: number; message: string }> {
+    try {
+        const response = await fetch(`${API_URL}/users/deduct-balance`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+                "ngrok-skip-browser-warning": "true",
+            },
+            body: JSON.stringify({ amount }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            return {
+                success: false,
+                message: errorData.message || `Failed to deduct balance: ${response.statusText}`
+            };
+        }
+
+        const data = await response.json();
+        return {
+            success: true,
+            newBalance: data.newBalance || data.balance,
+            message: "Balance deducted successfully"
+        };
+    } catch (error) {
+        console.error("Error deducting balance:", error);
+        return { success: false, message: "An error occurred while deducting balance." };
     }
 }

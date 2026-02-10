@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Menu, Bell } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
@@ -78,42 +78,39 @@ export function Navbar() {
                         </form>
                     </div>
                     <nav className="flex items-center space-x-2">
-                        <Button variant="ghost" size="icon">
-                            <Bell className="h-4 w-4" />
-                            <span className="sr-only">Notifications</span>
-                        </Button>
                         {isAuthenticated ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                                        <Avatar className="h-8 w-8">
+                                    <Button variant="ghost" className="relative h-10 w-10 rounded-full border-2 border-transparent hover:border-primary/20 transition-all p-0">
+                                        <Avatar className="h-10 w-10">
                                             <AvatarImage src="/avatars/01.png" alt={user?.email || "User"} />
-                                            <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                                            <AvatarFallback className="bg-primary text-primary-foreground font-bold">{user?.email?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56" align="end" forceMount>
+                                <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
                                     <DropdownMenuLabel className="font-normal">
-                                        <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-medium leading-none">User</p>
-                                            <p className="text-xs leading-none text-muted-foreground">
+                                        <div className="flex flex-col space-y-2 p-1">
+                                            <p className="text-sm font-bold leading-none">Account</p>
+                                            <p className="text-xs leading-none text-muted-foreground truncate">
                                                 {user?.email}
                                             </p>
                                         </div>
                                     </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
+                                    <DropdownMenuSeparator className="my-2" />
                                     {user?.balance !== undefined && (
-                                        <>
-                                            <DropdownMenuItem>
-                                                Balance: ${Number(user.balance).toFixed(2)}
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                        </>
+                                        <div className="px-2 py-2 mb-2 rounded-lg bg-primary/5 border border-primary/10">
+                                            <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Available Balance</p>
+                                            <p className="text-lg font-black text-primary">${Number(user.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                        </div>
                                     )}
                                     <DropdownMenuItem asChild>
-                                        <Link href="/profile" className="cursor-pointer">Profile</Link>
+                                        <Link href="/profile" className="cursor-pointer flex items-center py-2 px-3 rounded-lg hover:bg-accent transition-colors">
+                                            <span>Profile Settings</span>
+                                        </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={logout} className="text-red-600 focus:text-red-600 cursor-pointer">
+                                    <DropdownMenuSeparator className="my-2" />
+                                    <DropdownMenuItem onClick={logout} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer flex items-center py-2 px-3 rounded-lg transition-colors font-medium">
                                         Log out
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>

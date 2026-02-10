@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; // Assuming this component exists or will use standard textarea
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { mutate } from "swr";
 
 export default function SellPage() {
     const { isAuthenticated, isLoading, user } = useAuth();
@@ -19,7 +20,7 @@ export default function SellPage() {
         title: "",
         description: "",
         startingPrice: "",
-        endsAt: "",
+        endsAtIST: "",
     });
 
     useEffect(() => {
@@ -42,11 +43,11 @@ export default function SellPage() {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Not authenticated");
 
-            if (!formData.endsAt) {
+            if (!formData.endsAtIST) {
                 throw new Error("End date is required");
             }
 
-            const endDate = new Date(formData.endsAt);
+            const endDate = new Date(formData.endsAtIST);
             if (isNaN(endDate.getTime())) {
                 throw new Error("Invalid end date format");
             }
@@ -74,6 +75,8 @@ export default function SellPage() {
             }
 
             // Success
+            // Clear the cache for the auction list to reflect the new item
+            mutate((key: any) => Array.isArray(key) && key[0] === "/auctions");
             router.push("/dashboard");
         } catch (err: any) {
             console.error("Error creating auction:", err);
@@ -144,12 +147,12 @@ export default function SellPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="endsAt">End Date & Time</Label>
+                                <Label htmlFor="endsAtIST">End Date & Time (IST)</Label>
                                 <Input
-                                    id="endsAt"
-                                    name="endsAt"
+                                    id="endsAtIST"
+                                    name="endsAtIST"
                                     type="datetime-local"
-                                    value={formData.endsAt}
+                                    value={formData.endsAtIST}
                                     onChange={handleChange}
                                     required
                                 />

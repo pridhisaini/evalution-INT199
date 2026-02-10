@@ -4,8 +4,16 @@ import { MOCK_AUCTIONS } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { getAuctions } from "@/services/auctionService";
 
-export default function Home() {
+export default async function Home() {
+  const { auctions: realAuctions } = await getAuctions(1, 4);
+
+  // Use real auctions if available, otherwise fallback to mock
+  const trendingAuctions = realAuctions.length > 0
+    ? realAuctions
+    : MOCK_AUCTIONS.slice(0, 4);
+
   return (
     <div className="flex flex-col min-h-screen">
       <HeroCarousel />
@@ -24,7 +32,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {MOCK_AUCTIONS.slice(0, 4).map((auction) => (
+          {trendingAuctions.map((auction) => (
             <AuctionCard key={auction.id} auction={auction} />
           ))}
         </div>
