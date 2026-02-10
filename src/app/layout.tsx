@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "BidingApp - Premium Auction Marketplace",
+  title: "LiveBid - Premium Auction Marketplace",
   description: "A modern auction marketplace for unique objects.",
 };
 

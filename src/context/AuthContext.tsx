@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { API_URL } from "@/lib/constants";
+
 interface User {
     id: number;
     email: string;
@@ -30,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const fetchUser = async (token: string) => {
         try {
-            const response = await fetch("https://krystal-solutional-cherish.ngrok-free.dev/users/me", {
+            const response = await fetch(`${API_URL}/users/me`, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "ngrok-skip-browser-warning": "true",

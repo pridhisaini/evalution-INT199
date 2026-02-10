@@ -34,7 +34,8 @@ export interface AuctionsResponse {
     };
 }
 
-const API_URL = "https://krystal-solutional-cherish.ngrok-free.dev";
+import { API_URL } from "@/lib/constants";
+
 // Use a placeholder image since the API doesn't provide one yet
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400";
 const DEFAULT_CATEGORY = "General";
@@ -102,7 +103,7 @@ export async function getAuctionById(id: string): Promise<Auction | null> {
         }
 
         const apiAuction: ApiAuction = await response.json();
-console.log("fetch auction by id response", apiAuction);
+        console.log("fetch auction by id response", apiAuction);
         return {
             id: apiAuction.id.toString(),
             title: apiAuction.title,

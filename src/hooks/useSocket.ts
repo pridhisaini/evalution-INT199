@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = "https://krystal-solutional-cherish.ngrok-free.dev";
+import { SOCKET_URL } from "@/lib/constants";
 
 export function useSocket() {
     const [socket, setSocket] = useState<Socket | null>(null);

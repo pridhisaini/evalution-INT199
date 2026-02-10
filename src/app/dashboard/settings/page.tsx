@@ -32,11 +32,6 @@ export default function SettingsPage() {
                             <Input id="email" defaultValue={user?.email || ""} disabled />
                             <p className="text-xs text-muted-foreground">Email cannot be changed.</p>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Display Name</Label>
-                            <Input id="name" placeholder="Enter your name" />
-                        </div>
-                        <Button>Save Changes</Button>
                     </CardContent>
                 </Card>
 
@@ -51,7 +46,6 @@ export default function SettingsPage() {
                         <div className="text-2xl font-bold">
                             ${typeof user?.balance === 'string' ? parseFloat(user.balance).toLocaleString() : user?.balance?.toLocaleString() || "0.00"}
                         </div>
-                        <Button variant="outline">Add Funds</Button>
                     </CardContent>
                 </Card>
             </div>

@@ -21,9 +21,9 @@ function AuctionsPageContent() {
     const [searchQuery, setSearchQuery] = useState(initialSearch);
     const [sortBy, setSortBy] = useState("ending");
     const [statusFilters, setStatusFilters] = useState({
-        live: true,
-        upcoming: true,
-        endingSoon: true,
+        live: false,
+        upcoming: false,
+        endingSoon: false,
     });
 
     const { data, isLoading } = useSWR(
@@ -124,7 +124,7 @@ function AuctionsPageContent() {
     const resetFilters = () => {
         setSelectedCategory(null);
         setSearchQuery("");
-        setStatusFilters({ live: true, upcoming: false, endingSoon: false });
+        setStatusFilters({ live: false, upcoming: false, endingSoon: false });
     };
 
     return (

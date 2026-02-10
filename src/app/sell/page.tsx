@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { mutate } from "swr";
 
+import { API_URL } from "@/lib/constants";
+
 export default function SellPage() {
     const { isAuthenticated, isLoading, user } = useAuth();
     const router = useRouter();
@@ -59,7 +61,7 @@ export default function SellPage() {
                 endsAt: endDate.toISOString(),
             };
 
-            const response = await fetch("https://krystal-solutional-cherish.ngrok-free.dev/auctions", {
+            const response = await fetch(`${API_URL}/auctions`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

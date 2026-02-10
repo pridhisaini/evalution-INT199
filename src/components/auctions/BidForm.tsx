@@ -25,7 +25,7 @@ export function BidForm({ currentBid, onPlaceBid }: BidFormProps) {
     const form = useForm<BidFormValues>({
         resolver: zodResolver(bidSchema) as any,
         defaultValues: {
-            amount: currentBid + 10, // Suggested next bid
+            amount: currentBid + 1, // Minimum next bid
         },
     });
 
@@ -38,7 +38,7 @@ export function BidForm({ currentBid, onPlaceBid }: BidFormProps) {
         setIsSubmitting(true);
         await onPlaceBid(data.amount);
         setIsSubmitting(false);
-        form.reset({ amount: data.amount + 10 });
+        form.reset({ amount: data.amount + 1 });
     }
 
     return (
@@ -64,7 +64,7 @@ export function BidForm({ currentBid, onPlaceBid }: BidFormProps) {
                 )}
             </div>
             <p className="text-xs text-muted-foreground">
-                Minimum bid increment: $10.00
+                Enter any amount higher than the current bid.
             </p>
         </form>
     );

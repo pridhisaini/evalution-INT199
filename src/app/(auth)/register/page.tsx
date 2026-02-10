@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { API_URL } from "@/lib/constants";
+
 export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export default function RegisterPage() {
         const password = formData.get("password") as string;
 
         try {
-            const response = await fetch("https://krystal-solutional-cherish.ngrok-free.dev/auth/register", {
+            const response = await fetch(`${API_URL}/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -73,7 +75,7 @@ export default function RegisterPage() {
             <div className="relative z-10 container flex min-h-screen w-full flex-col items-center justify-center py-8">
                 <div className="mb-8 text-center">
                     <Link href="/" className="text-3xl font-bold text-primary hover:opacity-80 transition-opacity">
-                        BidingApp
+                        LiveBid
                     </Link>
                     <p className="text-muted-foreground mt-2">Join our community of collectors</p>
                 </div>

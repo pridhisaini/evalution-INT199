@@ -104,12 +104,6 @@ export function Navbar() {
                                             <p className="text-lg font-black text-primary">${Number(user.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                                         </div>
                                     )}
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/profile" className="cursor-pointer flex items-center py-2 px-3 rounded-lg hover:bg-accent transition-colors">
-                                            <span>Profile Settings</span>
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator className="my-2" />
                                     <DropdownMenuItem onClick={logout} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer flex items-center py-2 px-3 rounded-lg transition-colors font-medium">
                                         Log out
                                     </DropdownMenuItem>

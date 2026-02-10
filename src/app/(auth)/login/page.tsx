@@ -9,6 +9,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+import { API_URL } from "@/lib/constants";
+
 export default function LoginPage() {
     const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +27,7 @@ export default function LoginPage() {
         const password = formData.get("password") as string;
 
         try {
-            const response = await fetch("https://krystal-solutional-cherish.ngrok-free.dev/auth/login", {
+            const response = await fetch(`${API_URL}/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
