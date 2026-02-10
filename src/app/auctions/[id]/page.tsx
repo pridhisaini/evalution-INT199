@@ -18,11 +18,12 @@ import { Loader2, Users, Clock } from "lucide-react";
 import { useSocket } from "@/hooks/useSocket";
 import { useAuctionRoom } from "@/hooks/useAuctionRoom";
 import { ConnectionStatus } from "@/components/shared/ConnectionStatus";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 export default function AuctionDetailPage() {
     const params = useParams();
     const id = params.id as string;
+    const { mutate } = useSWRConfig();
     const { isAuthenticated, refreshUser, user } = useAuth();
     const [activeTab, setActiveTab] = useState("history"); // State for custom tabs
 
@@ -45,14 +46,16 @@ export default function AuctionDetailPage() {
         endsAtIST: websocketEndsAtIST,
         autoCloseTimer,
         winner,
-        isUserWinner
+        isUserWinner,
+        setCurrentPrice,
+        setBids
     } = useAuctionRoom({
         socket,
         isConnected,
         auctionId: id,
         userEmail: user?.email,
         initialEndsAt: auction?.endsAtIST,
-        initialPrice: auction?.startingPrice,
+        initialPrice: auction?.currentBid,
         initialStatus: auction?.status,
         initialBids: auction?.bids_history?.map((b: any) => ({
             id: b.id,
@@ -61,7 +64,7 @@ export default function AuctionDetailPage() {
             timestamp: new Date(b.timestamp)
         })),
         onBalanceDeduct: async (amount) => {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             if (token) {
                 console.log("💰 Deducting balance for win:", amount);
                 await deductBalance(amount, token);
@@ -72,9 +75,7 @@ export default function AuctionDetailPage() {
 
     const currentPrice = websocketPrice ?? auction?.currentBid ?? 0;
     const auctionStatus = websocketStatus ?? auction?.status ?? "ACTIVE";
-    const auctionEndsAtIST =  auction?.endsAtIST;
-console.log("websocketEndsAtIST", websocketEndsAtIST);
-console.log("auction?.endsAtIST", auction?.endsAtIST);
+    const auctionEndsAtIST = auction?.endsAtIST;
 
     const handlePlaceBid = async (amount: number) => {
         if (!isAuthenticated) {
@@ -82,7 +83,7 @@ console.log("auction?.endsAtIST", auction?.endsAtIST);
             return;
         }
 
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) {
             alert("Session expired. Please login again.");
             return;
@@ -91,6 +92,22 @@ console.log("auction?.endsAtIST", auction?.endsAtIST);
         const result = await placeBid(id, amount, token);
 
         if (result.success) {
+            // Optimistic update: Update price and bids history immediately
+            setCurrentPrice(amount);
+
+            const optimisticBid = {
+                id: Date.now(),
+                user: user?.email || "You",
+                amount: amount,
+                timestamp: new Date(),
+            };
+
+            setBids((prev: any) => [optimisticBid, ...prev]);
+
+            // Revalidate SWR data
+            mutate(`/auctions/${id}`);
+            mutate(`/auctions`);
+
             await refreshUser();
         } else {
             alert(result.message);

@@ -21,7 +21,12 @@ export function ConnectionStatus({ isConnected, error }: ConnectionStatusProps) 
         return (
             <Badge variant="outline" className="flex items-center gap-2 border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400">
                 <WifiOff className="h-3 w-3" />
-                <span className="text-xs">Connection Error</span>
+                <span className="text-xs">
+                    {error === "No authentication token found" ? "Login Required" : "Connection Error"}
+                </span>
+                {error !== "No authentication token found" && error && (
+                    <span className="text-[10px] opacity-70 ml-1">({typeof error === 'string' ? error.substring(0, 15) : 'Error'})</span>
+                )}
             </Badge>
         );
     }

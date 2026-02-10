@@ -262,5 +262,7 @@ export function useAuctionRoom({ socket, auctionId, onBalanceDeduct, userEmail, 
         autoCloseTimer,
         winner,
         isUserWinner,
+        setCurrentPrice,
+        setBids,
     };
 }

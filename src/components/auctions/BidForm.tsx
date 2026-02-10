@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 const bidSchema = z.object({
@@ -25,20 +25,35 @@ export function BidForm({ currentBid, onPlaceBid }: BidFormProps) {
     const form = useForm<BidFormValues>({
         resolver: zodResolver(bidSchema) as any,
         defaultValues: {
-            amount: currentBid + 1, // Minimum next bid
+            amount: currentBid + 1, // Suggest next valid bid
         },
     });
 
+    const { isDirty } = form.formState;
+
+    useEffect(() => {
+        // Only auto-reset if the user hasn't started typing their own bid
+        if (!isDirty) {
+            form.reset({ amount: currentBid + 1 });
+        }
+    }, [currentBid, form, isDirty]);
+
+
     async function onSubmit(data: BidFormValues) {
         if (data.amount <= currentBid) {
-            form.setError("amount", { message: "Bid must be higher than current bid" });
+            form.setError("amount", { message: `Bid must be higher than $${currentBid}` });
             return;
         }
 
         setIsSubmitting(true);
-        await onPlaceBid(data.amount);
-        setIsSubmitting(false);
-        form.reset({ amount: data.amount + 1 });
+        try {
+            await onPlaceBid(data.amount);
+            form.reset({ amount: data.amount + 1 });
+        } catch (error) {
+            console.error("Bid submission error:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (

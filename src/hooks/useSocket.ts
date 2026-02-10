@@ -12,8 +12,8 @@ export function useSocket() {
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
-        // Get JWT token from localStorage
-        const token = localStorage.getItem("token");
+        // Get JWT token from sessionStorage
+        const token = sessionStorage.getItem("token");
 
         if (!token) {
             setError("No authentication token found");
@@ -25,7 +25,10 @@ export function useSocket() {
             auth: {
                 token: token,
             },
-            transports: ["websocket", "polling"],
+            extraHeaders: {
+                "ngrok-skip-browser-warning": "true",
+            },
+            transports: ["polling", "websocket"],
         });
 
         socketRef.current = newSocket;
