@@ -23,6 +23,13 @@ export default function RegisterPage() {
         const formData = new FormData(e.currentTarget);
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
+        const confirmPassword = formData.get("confirmPassword") as string;
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            setIsLoading(false);
+            return;
+        }
 
         try {
             const response = await fetch(`${API_URL}/auth/register`, {
@@ -96,6 +103,10 @@ export default function RegisterPage() {
                             <div className="grid gap-2">
                                 <label htmlFor="password" className="text-sm font-medium">Password</label>
                                 <Input id="password" name="password" type="password" required />
+                            </div>
+                            <div className="grid gap-2">
+                                <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</label>
+                                <Input id="confirmPassword" name="confirmPassword" type="password" required />
                             </div>
                             {error && (
                                 <div className="text-sm text-red-500 bg-red-50 dark:bg-red-950/20 p-3 rounded-md border border-red-200 dark:border-red-900 animate-in fade-in slide-in-from-top-1">
