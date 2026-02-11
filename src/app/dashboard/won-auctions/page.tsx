@@ -18,7 +18,9 @@ export default function WonAuctionsPage() {
         }
     );
 
-    const wonAuctions = (data?.auctions || []).filter(a => a.status?.toUpperCase() === "SOLD");
+    const wonAuctions = (data?.auctions || []).filter(a =>
+        a.status?.toUpperCase() === "SOLD" && a.winnerId === user?.id
+    );
 
     return (
         <div className="space-y-6">

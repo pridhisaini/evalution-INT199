@@ -11,6 +11,7 @@ export interface Auction {
     bids: number;
     category: string;
     status?: string;
+    winnerId?: number | null;
     bids_history?: {
         id: number;
         bidderName: string;

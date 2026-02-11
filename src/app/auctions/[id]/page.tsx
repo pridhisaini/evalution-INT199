@@ -64,7 +64,7 @@ export default function AuctionDetailPage() {
             timestamp: new Date(b.timestamp)
         })),
         onBalanceDeduct: async (amount) => {
-            const token = sessionStorage.getItem("token");
+            const token = localStorage.getItem("token");
             if (token) {
                 console.log("💰 Deducting balance for win:", amount);
                 await deductBalance(amount, token);
@@ -83,7 +83,7 @@ export default function AuctionDetailPage() {
             return;
         }
 
-        const token = sessionStorage.getItem("token");
+        const token = localStorage.getItem("token");
         if (!token) {
             alert("Session expired. Please login again.");
             return;

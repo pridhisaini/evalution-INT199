@@ -22,15 +22,15 @@ export default function DashboardLayout({
 
     useEffect(() => {
         async function fetchCounts() {
+            if (!user?.id) return;
             const { auctions } = await getAuctions(1, 100);
-            // In a real app, we'd check if user.id is the winner
-            const won = auctions.filter(a => a.status?.toUpperCase() === "SOLD").length;
+            const won = auctions.filter(a => a.status?.toUpperCase() === "SOLD" && a.winnerId === user.id).length;
             const active = auctions.filter(a => !a.status || ["ACTIVE", "OPEN"].includes(a.status.toUpperCase())).length;
             setWonCount(won);
             setActiveCount(active);
         }
         fetchCounts();
-    }, []);
+    }, [user?.id]);
 
     const routes = [
         {

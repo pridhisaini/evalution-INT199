@@ -21,7 +21,7 @@ export default function DashboardPage() {
 
     const auctions = data?.auctions || [];
 
-    const wonCount = auctions.filter(a => a.status?.toUpperCase() === "SOLD").length;
+    const wonCount = auctions.filter(a => a.status?.toUpperCase() === "SOLD" && a.winnerId === user?.id).length;
     const activeCount = auctions.filter(a => !a.status || ["ACTIVE", "OPEN"].includes(a.status.toUpperCase())).length;
     const balance = typeof user?.balance === 'string' ? parseFloat(user.balance) : (user?.balance || 0);
 

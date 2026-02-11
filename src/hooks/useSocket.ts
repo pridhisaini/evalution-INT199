@@ -12,8 +12,8 @@ export function useSocket() {
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
-        // Get JWT token from sessionStorage
-        const token = sessionStorage.getItem("token");
+        // Get JWT token from localStorage
+        const token = localStorage.getItem("token");
 
         if (!token) {
             setError("No authentication token found");

@@ -71,6 +71,7 @@ export async function getAuctions(page: number = 1, limit: number = 10): Promise
             bids: apiAuction.bids_history?.length || 0,
             category: DEFAULT_CATEGORY,
             status: apiAuction.status,
+            winnerId: apiAuction.winnerId,
         }));
 
         return {
@@ -115,6 +116,7 @@ export async function getAuctionById(id: string): Promise<Auction | null> {
             bids: 0,
             category: DEFAULT_CATEGORY,
             status: apiAuction.status,
+            winnerId: apiAuction.winnerId,
             bids_history: apiAuction.bids_history,
         };
     } catch (error) {
